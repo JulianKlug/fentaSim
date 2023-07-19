@@ -9,11 +9,11 @@ import {makeStyles} from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
     title: {
-        fontSsize: "0.8rem",
+        fontSsize: "0.7rem",
         color: 'lightgray'
     },
     textInput: {
-        fontSize: "0.9rem",
+        fontSize: "0.7rem",
     }
 }));
 
@@ -51,12 +51,14 @@ export default function InputSlider({title, max, handleValueChange}) {
 
   return (
     <Box sx={{ width: 200 }}>
-        <Typography className={classes.title} id="input-slider" gutterBottom>
+        <Typography size={"small"}
+            className={classes.title} id="input-slider" gutterBottom>
           {title}
         </Typography>
       <Grid container spacing={2} alignItems="center">
         <Grid item xs>
           <Slider
+            size="small"
             value={typeof value === 'number' ? value : 0}
             min={min}
             step={step}
