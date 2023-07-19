@@ -1,5 +1,7 @@
 import fentanyl from "./fentanyl.js";
 import solveCubic from "./solveCubic.js";
+import tPeakError from "./tPeakError.js";
+import optimize from "../utils/optimize.js";
 
 /**
  * Get the pharmacokinetic and pharmacodynamic values for a drug based on patient covariates.
@@ -9,10 +11,9 @@ import solveCubic from "./solveCubic.js";
  * @param {number} height - Height in cm.
  * @param {number} age - Age in years.
  * @param {string} sex - Sex as string: "female" or "male".
- * @param {Object} drugDefaults - Output from getDrugDefaults(drug).
  * @returns {Object} - Pharmacokinetic and pharmacodynamic values for the drug.
  */
-function getDrugPK(drug = "propofol", weight = 70, height = 170, age = 50, sex = "male", drugDefaults) {
+function getDrugPK(drug = "fentanyl", weight = 70, height = 170, age = 50, sex = "male") {
   const DEBUG = false;
 
   const implemented_drugs = {
@@ -23,12 +24,12 @@ function getDrugPK(drug = "propofol", weight = 70, height = 170, age = 50, sex =
   }
   const drug_function = implemented_drugs[drug];
 
-  const X = drug_function(weight, height, age, sex);
-  const tPeak = X.tPeak;
+  const drug_parameters = drug_function(weight, height, age, sex);
+  const tPeak = drug_parameters.tPeak;
 
-  const events = Object.keys(X.PK);
+  const events = Object.keys(drug_parameters.PK);
   for (const event of events) {
-    const { v1, v2, v3, cl1, cl2, cl3 } = X.PK[event];
+    const { v1, v2, v3, cl1, cl2, cl3 } = drug_parameters.PK[event];
 
     // Note on Oral, IM, and IN route PK
     // Oral is (for now) state 4 for plasma and state 5 for effect site
@@ -42,35 +43,35 @@ function getDrugPK(drug = "propofol", weight = 70, height = 170, age = 50, sex =
 
     // Set up PK for oral delivery
     let ka_PO, bioavailability_PO, tlag_PO;
-    if (X.PK[event].ka_PO !== null) {
-      ka_PO = X.PK[event].ka_PO;
-      bioavailability_PO = X.PK[event].bioavailability_PO ?? 1;
-      tlag_PO = X.PK[event].tlag_PO ?? 0;
+    if (drug_parameters.PK[event].ka_PO !== null) {
+      ka_PO = drug_parameters.PK[event].ka_PO;
+      bioavailability_PO = drug_parameters.PK[event].bioavailability_PO ?? 1;
+      tlag_PO = drug_parameters.PK[event].tlag_PO ?? 0;
     } else {
       ka_PO = bioavailability_PO = tlag_PO = 0;
     }
 
     // Set up PK for IM delivery
     let ka_IM, bioavailability_IM, tlag_IM;
-    if (X.PK[event].ka_IM !== null) {
-      ka_IM = X.PK[event].ka_IM;
-      bioavailability_IM = X.PK[event].bioavailability_IM ?? 1;
-      tlag_IM = X.PK[event].tlag_IM ?? 0;
+    if (drug_parameters.PK[event].ka_IM !== null) {
+      ka_IM = drug_parameters.PK[event].ka_IM;
+      bioavailability_IM = drug_parameters.PK[event].bioavailability_IM ?? 1;
+      tlag_IM = drug_parameters.PK[event].tlag_IM ?? 0;
     } else {
       ka_IM = bioavailability_IM = tlag_IM = 0;
     }
 
     // Set up PK for IN delivery
     let ka_IN, bioavailability_IN, tlag_IN;
-    if (X.PK[event].ka_IN !== null) {
-      ka_IN = X.PK[event].ka_IN;
-      bioavailability_IN = X.PK[event].bioavailability_IN ?? 1;
-      tlag_IN = X.PK[event].tlag_IN ?? 0;
+    if (drug_parameters.PK[event].ka_IN !== null) {
+      ka_IN = drug_parameters.PK[event].ka_IN;
+      bioavailability_IN = drug_parameters.PK[event].bioavailability_IN ?? 1;
+      tlag_IN = drug_parameters.PK[event].tlag_IN ?? 0;
     } else {
       ka_IN = bioavailability_IN = tlag_IN = 0;
     }
 
-    const customFunction = X.PK[event].customFunction ?? "";
+    const customFunction = drug_parameters.PK[event].customFunction ?? "";
 
     const k10 = cl1 / v1;
     const k12 = cl2 / v1;
@@ -168,7 +169,15 @@ function getDrugPK(drug = "propofol", weight = 70, height = 170, age = 50, sex =
     // Find ke0 from tPeak
     let ke0;
     if (tPeak > 0) {
-      ke0 = optimize(tPeakError, [0, 200], tPeak, p_coef_bolus_l1, p_coef_bolus_l2, p_coef_bolus_l3, lambda_1, lambda_2, lambda_3).minimum;
+      ke0 = optimize(tPeakError, [0, 200], {maximum:false}, {
+        tPeak,
+        p_coef_bolus_l1,
+        p_coef_bolus_l2,
+        p_coef_bolus_l3,
+        lambda_1,
+        lambda_2,
+        lambda_3
+      }).extremum;
     } else {
       ke0 = 0;
     }
@@ -242,7 +251,7 @@ function getDrugPK(drug = "propofol", weight = 70, height = 170, age = 50, sex =
     }
 
     // Assign PK values to event
-    X.PK[event] = {
+    drug_parameters.PK[event] = {
       v1,
       v2,
       v3,
@@ -333,7 +342,7 @@ function getDrugPK(drug = "propofol", weight = 70, height = 170, age = 50, sex =
   }
 
   // Convert events object to array of PK values
-  const PKValues = Object.values(X.PK);
+  const PKValues = Object.values(drug_parameters.PK);
 
   // Sort the PK values by event number
   PKValues.sort((a, b) => a.event - b.event);
@@ -342,5 +351,11 @@ function getDrugPK(drug = "propofol", weight = 70, height = 170, age = 50, sex =
     console.log(PKValues);
   }
 
-  return PKValues;
+  drug_parameters.drug = drug;
+  drug_parameters.PK = PKValues;
+
+  return drug_parameters;
 }
+
+
+export default getDrugPK;

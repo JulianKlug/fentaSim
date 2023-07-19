@@ -2,6 +2,7 @@ import advanceState from "./advanceState.js";
 import calculateCe from "./calculateCe.js";
 import fentanyl from "./fentanyl.js";
 import preprocessDose from "./preprocessDose.js";
+import getDrugPK from "./getDrugPK.js";
 
 /**
  * Calculates advanced closed form approach for a given dose, pkSet, maximum
@@ -12,25 +13,28 @@ import preprocessDose from "./preprocessDose.js";
  */
 function advanceClosedForm0(dose, pkSet, maximum) {
   // Create timeline
-  // let timeLine = [0, ...dose.Time, dose.Time.filter((t, i) => dose.Bolus[i]).map(t => t - 0.01), maximum];
-  // timeLine = timeLine.filter(t => t >= 0);
-  //
-  let timeLine = [0, ...dose.map(entry => entry.Time), ...dose.filter(entry => entry.Units === "mcg/kg/min" && entry.Dose > 0).map(entry => entry.Time - 0.01), maximum];
+  let timeLine = [0, ...dose.map(entry => entry.Time), ...dose.filter(entry => entry.Bolus).map(entry => entry.Time - 0.01), maximum];
+  // retain only unique values
+  timeLine = [...new Set(timeLine)];
+    // remove negative values
   timeLine = timeLine.filter(t => t >= 0);
 
   // Fill in gaps using exponentially decreasing amounts
   let gapStart = timeLine.slice(0, -1);
   let gapEnd = timeLine.slice(1);
   let start = Math.min(0.693 / pkSet.ke0 / 4, 1);
+
   let newTimes = Array.from({ length: 41 }, (_, i) => Math.exp(Math.log(start) + i * Math.log(1440 / start) / 41));
   for (let i = 0; i < gapEnd.length; i++) {
     let distance = gapEnd[i] - gapStart[i];
     let times = newTimes.filter(t => t <= distance);
-    timeLine.push(...times.map(t => gapStart[i] + t));
+    times = times.map(t => gapStart[i] + t);
+    timeLine.push(...times);
   }
-  timeLine.sort((a, b) => a - b);
+  timeLine = [...new Set(timeLine)].sort(function(a,b) { return a - b;});
   let L = timeLine.length;
   let doseNA = Array(L).fill(0);
+
 
   // Create bolusLine and infusionLine
   let bolusLine = Array(L).fill(0);
@@ -38,17 +42,19 @@ function advanceClosedForm0(dose, pkSet, maximum) {
   let dt = Array(L).fill(0);
   let rate = Array(L).fill(0);
   for (let i = 0; i < L; i++) {
-    bolusLine[i] = dose.Dose.filter((_, j) => dose.Time[j] === timeLine[i] && dose.Bolus[j]).reduce((sum, val) => sum + val, 0);
-    let USE = dose.Time.map((t, j) => t === timeLine[i] && !dose.Bolus[j]);
+    bolusLine[i] = dose.filter(entry => entry.Time === timeLine[i] && entry.Bolus).reduce((sum, entry) => sum + entry.Dose, 0);
+    let USE = dose.map((entry) => entry.Time === timeLine[i] && !entry.Bolus);
+
     if (i === 0) {
-      infusionLine[i] = dose.Dose.filter((_, j) => USE[j]).reduce((sum, val) => sum + val, 0);
+      infusionLine[i] = dose.filter((entry, j) => USE[j]).reduce((sum, entry) => sum + entry.Dose, 0);
+      // console.log("infusionLine[i]", infusionLine[i]);
       rate[i] = 0;
       dt[i] = 0;
     } else {
       if (USE.every(u => !u)) {
         infusionLine[i] = infusionLine[i - 1];
       } else {
-        infusionLine[i] = dose.Dose.filter((_, j) => USE[j]).reduce((sum, val) => sum + val, 0);
+        infusionLine[i] = dose.filter((entry, j) => USE[j]).reduce((sum, entry) => sum + entry.Dose, 0);
       }
       dt[i] = timeLine[i] - timeLine[i - 1];
       rate[i] = infusionLine[i - 1];
@@ -88,41 +94,4 @@ function advanceClosedForm0(dose, pkSet, maximum) {
 }
 
 
-const fentanylPK = fentanyl(70,
-    170,
-    50,
-    "male",).PK[0];
-
-const doseTable = [
-  { Drug: "fentanyl", Time: 0, Dose: 60, Units: "mcg" },
-  { Drug: "fentanyl", Time: 0, Dose: 0.15, Units: "mcg/kg/min" },
-  { Drug: "fentanyl", Time: 30, Dose: 0, Units: "mcg/kg/min" }
-];
-
-const processedDoseTable = preprocessDose(doseTable, "ng", 80);
-
-console.log(fentanyl(70,
-    170,
-    50,
-    "male"))
-
-const maximum = 60;
-let timeLine = [0, ...processedDoseTable.map(entry => entry.Time), ...processedDoseTable.filter(entry => entry.Units === "mcg/kg/min" && entry.Dose > 0).map(entry => entry.Time - 0.01), maximum];
-timeLine = timeLine.filter(t => t >= 0);
-
-// Fill in gaps using exponentially decreasing amounts
-let gapStart = timeLine.slice(0, -1);
-let gapEnd = timeLine.slice(1);
-let start = Math.min(0.693 / fentanylPK.ke0 / 4, 1);
-let newTimes = Array.from({ length: 41 }, (_, i) => Math.exp(Math.log(start) + i * Math.log(1440 / start) / 41));
-for (let i = 0; i < gapEnd.length; i++) {
-  let distance = gapEnd[i] - gapStart[i];
-  let times = newTimes.filter(t => t <= distance);
-  timeLine.push(...times.map(t => gapStart[i] + t));
-}
-timeLine.sort((a, b) => a - b);
-
-
-console.log(timeLine)
-
-// console.log(advanceClosedForm0(processedDoseTable, fentanylPK, 50));
+export default advanceClosedForm0;

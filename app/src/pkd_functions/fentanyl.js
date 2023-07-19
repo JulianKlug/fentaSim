@@ -44,13 +44,26 @@ function fentanyl(weight, height, age, sex) {
   let lowerTypical = MEAC * 2.0;
   let reference = "JPET 1987,240:159-166";
 
+
   return {
+    Drug: 'fentanyl',
+    ConcentrationUnits: 'ng',
+    BolusUnits: 'mcg',
+    InfusionUnits: 'mcg/kg/hr',
+    DefaultUnits: 'mcg',
+    Units: ['mcg', 'mcg/kg', 'mcg/kg/hr'],
+    Color: '#0491E2',
     PK: PK,
     tPeak: tPeak,
     MEAC: MEAC,
+    Lower: 0.48,
+    Upper: 1.2,
+    endCe: 0.6,
+    endCeText: 'ventilation',
     typical: typical,
     upperTypical: upperTypical,
     lowerTypical: lowerTypical,
+
     reference: reference
   };
 

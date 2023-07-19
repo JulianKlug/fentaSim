@@ -1,58 +1,79 @@
 import {makeStyles} from "@material-ui/core/styles";
 import {useState} from "react";
 import Graph from "./Graph";
+import getDrugPK from "../pkd_functions/getDrugPK.js";
+import preprocessDose from "../pkd_functions/preprocessDose.js";
+import advanceClosedForm0 from "../pkd_functions/advanceClosedForm0.js";
 
 
 const useStyles = makeStyles((theme) => ({
+    simulator: {
+        width: '80vw',
+        margin: 'auto',
+        marginTop: '10vh',
+        marginBottom: '5vh'
+    },
+
+    site: {
+        textAlign: 'right',
+        color: 'lightgray'
+    }
 
 }));
 
 const ConcentrationSimulator = ({}) => {
     const classes = useStyles();
     const [doseHistory, setDoseHistory] = useState([]);
-    const [concentrationEstimation, setConcentrationEstimation] = useState([]);
+    const [concentrationEvolution, setConcentrationEvolution] = useState([]);
 
-  function estimateConcentrationEvolution(currentConcentration, currentTimestamp) {
-      const currentTimestampClone = new Date(currentTimestamp.getTime())
-      // future concentrations will be an exponential decay, computed at 30s intervals
-      const concentration_at_t = (t) => currentConcentration * Math.exp(-t / 10);
-      const future_timestamps = Array.from({length: 10}, (_, i) => {
-       return new Date(currentTimestampClone.setSeconds(currentTimestampClone.getSeconds() + i * 30))
-      })
-      const future_deltas_from_current_time = Array.from({length: 10}, (_, i) => i * 30);
-      const future_concentrations = future_deltas_from_current_time.map(concentration_at_t);
-      const future_concentrations_with_timestamps = future_concentrations.map((c, i) => ({x: future_timestamps[i], y: c}));
-      return future_concentrations_with_timestamps;
-  }
+    const weight = 70;
+    const height = 170;
+    const age = 50;
+    const sex = 'male'
+    const fentanyl = getDrugPK('fentanyl', weight, height, age, sex);
+    const fentanylPK = fentanyl.PK[0];
+    const maximum = 60;
+    const site = 'Effect Site'
+
+    // Update dose history and concentration evolution when a new dose is added, and return new dose history as well as refereence timepoint
+    function updateDoseHistory(newDose) {
+        const tempDoseHistory = [...doseHistory, newDose];
+        // get smallest time in doseHistory
+        const referenceTime = tempDoseHistory.reduce((prev, curr) => {
+            return (curr.TimeDate < prev.TimeDate ? curr : prev);
+        }).TimeDate;
+        // set Time to delta time from smallest time for every dose in doseHistory (in minutes)
+        tempDoseHistory.forEach((dose) => {
+            dose.Time = (dose.TimeDate - referenceTime) / 1000 / 60;
+        });
+        setDoseHistory(tempDoseHistory);
+        return [tempDoseHistory, referenceTime];
+    }
 
   function addDose() {
-      const dose = 10;
-    //   use current time as x value
-    const currentTime = new Date();
-    setDoseHistory([...doseHistory, {x: currentTime, y: dose}]);
+      const currentTime = new Date();
+      const newDose = { Drug: "fentanyl", TimeDate: currentTime.getTime(), Dose: 100, Units: "mcg" }
 
-    // get current concentration from last concentration estimation (find item with x value closest to current time)
-    if (concentrationEstimation.length === 0) {
-        setConcentrationEstimation(estimateConcentrationEvolution(dose, currentTime));
-        return;
-    } else {
-        const currentConcentration = concentrationEstimation.reduce((prev, curr) => {
-            return (Math.abs(curr.x - currentTime) < Math.abs(prev.x - currentTime) ? curr : prev);
-        }).y;
-        const newConcentration = currentConcentration + dose;
-        const futureConcentrations = estimateConcentrationEvolution(newConcentration, currentTime);
+      const [newDoseHistory, referenceTime] = updateDoseHistory(newDose);
 
-        // add the new concentration to the existing concentration estimation up to the current time
-        const newConcentrationEstimation = concentrationEstimation.filter((c) => c.x.getTime() <= currentTime.getTime());
-        newConcentrationEstimation.push(...futureConcentrations);
-        setConcentrationEstimation(newConcentrationEstimation);
-    }
+      const processedDoseTable = preprocessDose(newDoseHistory, fentanyl.ConcentrationUnits, weight);
+      const results = advanceClosedForm0(processedDoseTable, fentanylPK, maximum)
+
+      // set concentration evolution to x (results.time + reference time) and y (results.Cp)
+        const newConcentrationEvolution = results.Time.map((t, i) => {
+            return {x: new Date(referenceTime + (t * 60 * 1000)), y: results.Ce[i], Cp: results.Cp[i]}
+        });
+    setConcentrationEvolution(newConcentrationEvolution);
+
   }
 
     return (
     <div>
-        <div style={{width: '80vw', margin: 'auto', marginTop: '10vh', marginBottom: '5vh'}}>
-                 <Graph data={concentrationEstimation} />
+        <div className={classes.simulator}>
+            <div className={classes.site}>
+                {site}
+            </div>
+            <Graph data={concentrationEvolution} />
         </div>
          <button
                  style={{margin: 'auto', display: 'block'}}

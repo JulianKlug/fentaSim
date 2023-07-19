@@ -31,22 +31,20 @@ function preprocessDose(dose, concentration_units, weight) {
     let unit = dose[i].Units;
     let convertedDose = dose[i].Dose;
 
-    switch (unit) {
-      case "mg":
-        convertedDose /= mg_Conv;
-        break;
-      case "mcg":
+    if (unit.includes("mg")) {
+      convertedDose /= mg_Conv;
+    }
+    if (unit.includes("mcg")) {
         convertedDose /= mcg_Conv;
-        break;
-      case "ng":
-        convertedDose /= ng_Conv;
-        break;
-      case "mcg/kg/min":
+    }
+    if (unit.includes("ng")) {
+      convertedDose /= ng_Conv;
+    }
+    if (unit.includes("kg")) {
         convertedDose *= weight;
-        break;
-      case "hr":
+    }
+    if (unit.includes("hr")) {
         convertedDose /= 60;
-        break;
     }
 
     dose[i].Dose = convertedDose;

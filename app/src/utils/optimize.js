@@ -8,7 +8,7 @@
  * @param {number} options.upper The upper end point of the interval to be searched.
  * @param {boolean} options.maximum Should we maximize or minimize (default is false)?
  * @param {number} options.tol The desired accuracy.
- * @returns {object} An object with properties 'minimum' and 'objective' representing the location of the minimum (or maximum) and the value of the function at that point.
+ * @returns {object} An object with properties 'extremum' and 'objective' representing the location of the minimum (or maximum) and the value of the function at that point.
  */
 function optimize(f, interval, options = {}, functionArgs = {}) {
   const { lower = Math.min(...interval), upper = Math.max(...interval), maximum = false, tol = Math.sqrt(Number.EPSILON) ** 0.25 } = options;
@@ -28,6 +28,7 @@ function optimize(f, interval, options = {}, functionArgs = {}) {
     fc = f(c, functionArgs);
     fd = f(d, functionArgs);
 
+    // Note: the maximum search is still diverging from the R version for some reason
     if (maximum) {
       if (fc > fd) {
         b = d;
@@ -50,10 +51,10 @@ function optimize(f, interval, options = {}, functionArgs = {}) {
     d = a + (b - a) / gr;
   }
 
-  const minimum = (b + a) / 2;
-  const objective = f(minimum, functionArgs);
+  const extremum = (b + a) / 2;
+  const objective = f(extremum, functionArgs);
 
-  return { minimum, objective };
+  return { extremum, objective };
 }
 
 export default optimize;
