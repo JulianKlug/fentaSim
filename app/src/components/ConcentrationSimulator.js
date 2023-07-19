@@ -4,6 +4,7 @@ import Graph from "./Graph";
 import getDrugPK from "../pkd_functions/getDrugPK.js";
 import preprocessDose from "../pkd_functions/preprocessDose.js";
 import advanceClosedForm0 from "../pkd_functions/advanceClosedForm0.js";
+import DoseInput from "./DoseInput";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -13,10 +14,9 @@ const useStyles = makeStyles((theme) => ({
         marginTop: '10vh',
         marginBottom: '5vh'
     },
-
-    site: {
-        textAlign: 'right',
-        color: 'lightgray'
+    doseInput: {
+        width: '90%',
+        margin: 'auto',
     }
 
 }));
@@ -35,8 +35,8 @@ const ConcentrationSimulator = ({}) => {
     const maximum = 60;
     const site = 'Effect Site'
 
-    // Update dose history and concentration evolution when a new dose is added, and return new dose history as well as refereence timepoint
-    function updateDoseHistory(newDose) {
+    // Update dose history and concentration evolution when a new dose is added, and return new dose history as well as reference timepoint
+    const updateDoseHistory = (newDose) => {
         const tempDoseHistory = [...doseHistory, newDose];
         // get smallest time in doseHistory
         const referenceTime = tempDoseHistory.reduce((prev, curr) => {
@@ -50,9 +50,10 @@ const ConcentrationSimulator = ({}) => {
         return [tempDoseHistory, referenceTime];
     }
 
-  function addDose() {
-      const currentTime = new Date();
-      const newDose = { Drug: "fentanyl", TimeDate: currentTime.getTime(), Dose: 100, Units: "mcg" }
+  const addDose = (dose, time) => {
+        // dose in mcg
+      const currentTime = new Date(time);
+      const newDose = { Drug: "fentanyl", TimeDate: currentTime.getTime(), Dose: dose, Units: "mcg" }
 
       const [newDoseHistory, referenceTime] = updateDoseHistory(newDose);
 
@@ -64,22 +65,18 @@ const ConcentrationSimulator = ({}) => {
             return {x: new Date(referenceTime + (t * 60 * 1000)), y: results.Ce[i], Cp: results.Cp[i]}
         });
     setConcentrationEvolution(newConcentrationEvolution);
-
   }
 
     return (
     <div>
         <div className={classes.simulator}>
-            <div className={classes.site}>
-                {site}
-            </div>
-            <Graph data={concentrationEvolution} />
+            <Graph data={concentrationEvolution} site={site} />
         </div>
-         <button
-                 style={{margin: 'auto', display: 'block'}}
-                 onClick={addDose}>
-                 Add Dose
-         </button>
+        <div className={classes.doseInput}>
+        <DoseInput
+            addDose={addDose}
+        />
+        </div>
     </div>
     )
 }

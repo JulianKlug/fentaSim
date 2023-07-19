@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const Graph = ({ data }) => {
+const Graph = ({ data, site }) => {
     const classes = useStyles();
     const [activeIndex, setActiveIndex] = React.useState(null)
 
@@ -100,6 +100,14 @@ const Graph = ({ data }) => {
             // Data
             <path className={classes.graph_data} d={lineData} />
 
+
+            // Site label (upper right)
+            <text
+                className={classes.text}
+                transform={`translate(${layout.width - 100}, 20)`}
+            >
+                {site}
+            </text>
 
             // y-axis label
           <text
