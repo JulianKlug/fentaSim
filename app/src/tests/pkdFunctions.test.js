@@ -4,6 +4,7 @@ import fentanyl from '../pkd_functions/fentanyl';
 import preprocessDose from '../pkd_functions/preprocessDose';
 import solveCubic from '../pkd_functions/solveCubic';
 import CE from '../pkd_functions/CE';
+import tPeakError from "../pkd_functions/tPeakError.js";
 
 test('advanceState: Output of advanceState matches Output of R version', () => {
   expect(advanceState([0,1,2,3], [0,1,2,3], [1,2,3,0], 0, 4)).toStrictEqual([ 1, 4, 13, 42 ]);
@@ -91,6 +92,14 @@ test('solveCubic: Output of solveCubic matches Output of R version', () => {
 
 
 test('CE: Output of CE matches Output of R version', () => {
-    expect(CE(1, 1, 2, 3, 4, 1, 2, 3, 4)).toStrictEqual(
+    expect(CE(1, {
+        e_coef_bolus_1:1, e_coef_bolus_2:2, e_coef_bolus_3:3, e_coef_bolus_4:4, lambda_1:1, lambda_2:2, lambda_3:3, lambda_4:4
+        })).toStrictEqual(
         0.8611737683031964);
+})
+
+
+test('tPeakError: Output of tPeakError matches Output of R version (approximately)', () => {
+    const tpeakE = tPeakError(10, {tPeak: 0.1, p_coef_bolus_1: 0.5, p_coef_bolus_2: 0.5, p_coef_bolus_3: 0.5, lambda_1: 0.5, lambda_2: 0.5, lambda_3: 0.5});
+    expect(tpeakE).toBeCloseTo(0.046);
 })

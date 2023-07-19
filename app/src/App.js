@@ -1,4 +1,4 @@
-import ConcentrationSimulator from "./components/ConcentrationSimulator";
+import ConcentrationSimulator from "./components/ConcentrationSimulator.js";
 
 function App() {
   return (

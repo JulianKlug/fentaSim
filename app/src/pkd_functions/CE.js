@@ -12,7 +12,7 @@
  * @param {number} lambda_4 The lambda value associated with the peak effect site concentration.
  * @returns {number} The value of the function at time t.
  */
-function CE(t, e_coef_bolus_1, e_coef_bolus_2, e_coef_bolus_3, e_coef_bolus_4, lambda_1, lambda_2, lambda_3, lambda_4) {
+function CE(t, {e_coef_bolus_1, e_coef_bolus_2, e_coef_bolus_3, e_coef_bolus_4, lambda_1, lambda_2, lambda_3, lambda_4}) {
   return (
     e_coef_bolus_1 * Math.exp(-lambda_1 * t) +
     e_coef_bolus_2 * Math.exp(-lambda_2 * t) +
