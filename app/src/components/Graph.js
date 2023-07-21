@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
     },
     // Set the border for the whole graph
     graph: {
+        height: '30vh',
       overflow: 'visible',
     },
 

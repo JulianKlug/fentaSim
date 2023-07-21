@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
     simulator: {
         width: '80vw',
         margin: 'auto',
-        marginTop: '10vh',
+        marginTop: '5vh',
         marginBottom: '5vh'
     },
     doseInput: {
