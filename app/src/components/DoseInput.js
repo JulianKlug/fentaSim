@@ -25,7 +25,7 @@ const DoseInput = ({addDose}) => {
 
     return (
         <div>
-            <Grid container spacing={5} direction="row" alignItems="center" justifyContent="center">
+            <Grid container rowSpacing={2} columnSpacing={5} direction="row" alignItems="center" justifyContent="center">
                 <Grid item
                     sx={{
                             width: 200,
