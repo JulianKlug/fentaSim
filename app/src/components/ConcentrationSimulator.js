@@ -37,6 +37,7 @@ const ConcentrationSimulator = ({}) => {
     const maximum = 60;
     const site = 'Effect Site'
 
+
     // Use effect to monitor changes in height, weight, age, sex, and update drugInfo
     useEffect(() => {
         const newDrugInfo = getDrugPK(drug, weight, height, age, sex)
