@@ -45,9 +45,10 @@ const Graph = ({ data, site }) => {
     const yMinValue = d3.min(data, (d) => d.y);
     const yMaxValue = d3.max(data, (d) => d.y);
 
+
     const graphDetails = {
         xScale: scaleTime().domain(d3.extent(data, (d) => d.x)).range([0, layout.width]),
-        yScale: scaleLinear().domain([yMinValue - 1, yMaxValue + 2]).range([layout.height, 0]),
+        yScale: scaleLinear().domain([0, yMaxValue + 2]).range([layout.height, 0]),
         lineGenerator: line()
     };
     const [lineData, setLineData] = useState(() =>
@@ -137,7 +138,7 @@ const Graph = ({ data, site }) => {
                           y={graphDetails.yScale(item.y) - 20}
                           textAnchor="middle"
                       >
-                          {index === activeIndex ? item.y : ""}
+                          {index === activeIndex ? item.y.toFixed(2) : ""}
                       </text>
                      // hovering circle
                       <circle
