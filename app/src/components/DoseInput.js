@@ -20,7 +20,7 @@ const DoseInput = ({addDose}) => {
 
     // update time every 30 seconds
     useEffect(() => {
-      setInterval(() => setTimeValue(dayjs(new Date())), 30000);
+      setInterval(() => setTimeValue(dayjs(new Date())), 90000);
     }, []);
 
     return (
