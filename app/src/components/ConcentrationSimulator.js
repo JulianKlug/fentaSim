@@ -25,6 +25,8 @@ const ConcentrationSimulator = ({}) => {
     const classes = useStyles();
     const [doseHistory, setDoseHistory] = useState([]);
     const [referenceTime, setReferenceTime] = useState(new Date());
+    // maximum time span to compute concentration evolution for (in minutes)
+    const [maximum, setMaximum] = useState(60)
     const [concentrationEvolution, setConcentrationEvolution] = useState([]);
     const [height, setHeight] = useState(170);
     const [weight, setWeight] = useState(70);
@@ -33,8 +35,6 @@ const ConcentrationSimulator = ({}) => {
     const drug = 'fentanyl';
     const [drugInfo, setDrugInfo] = useState(getDrugPK(drug, weight, height, age, sex));
 
-    // maximum time span to compute concentration evolution for (in minutes)
-    const maximum = 60;
     const site = 'Effect Site'
 
 
@@ -65,12 +65,17 @@ const ConcentrationSimulator = ({}) => {
         const referenceTime = tempDoseHistory.reduce((prev, curr) => {
             return (curr.TimeDate < prev.TimeDate ? curr : prev);
         }).TimeDate;
+        // get last dose time
+        const lastDoseTime = tempDoseHistory.reduce((prev, curr) => {
+            return (curr.TimeDate > prev.TimeDate ? curr : prev);
+        }).TimeDate;
+
         // set Time to delta time from smallest time for every dose in doseHistory (in minutes)
         tempDoseHistory.forEach((dose) => {
             dose.Time = (dose.TimeDate - referenceTime) / 1000 / 60;
         });
         setDoseHistory(tempDoseHistory);
-        return [tempDoseHistory, referenceTime];
+        return [tempDoseHistory, referenceTime, lastDoseTime];
     }
 
   const addDose = (dose, time) => {
@@ -78,8 +83,11 @@ const ConcentrationSimulator = ({}) => {
       const currentTime = new Date(time);
       const newDose = { Drug: drug, TimeDate: currentTime.getTime(), Dose: dose, Units: "mcg" }
 
-      const [newDoseHistory, newReferenceTime] = updateDoseHistory(newDose);
+      const [newDoseHistory, newReferenceTime, newLastDoseTime] = updateDoseHistory(newDose);
       setReferenceTime(newReferenceTime);
+      // let new maximum be time from referenceTime to lastDoseTime plus 120min
+      const newMaximum = (newLastDoseTime - newReferenceTime) / (60 * 1000) + 120
+      setMaximum(newMaximum)
 
       const processedDoseTable = preprocessDose(newDoseHistory, drugInfo.ConcentrationUnits, weight);
       const drugPK = drugInfo.PK[0];
