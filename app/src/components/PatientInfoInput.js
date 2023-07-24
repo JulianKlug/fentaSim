@@ -22,20 +22,20 @@ export default function PatientInfoInput({height, weight, age, sex, setHeight, s
     <div className={classes.currentPatientInfo}>
        <SensorOccupiedIcon size="inherit"/>
             {/*Age:*/}
-            <FormControl sx={{ width: '3ch' }}>
-                <TextField style={{width: "3ch"}} id="standard-basic" label={"Age"} variant="standard" defaultValue={age}
-                onChange={(event) => {
-                          setAge(event.target.value);
-                        }}
-                />
-            </FormControl>
-            {/*Height:*/}
-            <TextField style={{width: "6ch"}} id="standard-basic" variant="standard" label={"Height"} defaultValue={height}
-                               InputProps={{endAdornment: <InputAdornment position="end">cm</InputAdornment>}}
-                    onChange={(event) => {
-                                  setHeight(event.target.value);
-                                }}
-            />
+            {/*<FormControl sx={{ width: '3ch' }}>*/}
+            {/*    <TextField style={{width: "3ch"}} id="standard-basic" label={"Age"} variant="standard" defaultValue={age}*/}
+            {/*    onChange={(event) => {*/}
+            {/*              setAge(event.target.value);*/}
+            {/*            }}*/}
+            {/*    />*/}
+            {/*</FormControl>*/}
+            {/*/!*Height:*!/*/}
+            {/*<TextField style={{width: "6ch"}} id="standard-basic" variant="standard" label={"Height"} defaultValue={height}*/}
+            {/*                   InputProps={{endAdornment: <InputAdornment position="end">cm</InputAdornment>}}*/}
+            {/*        onChange={(event) => {*/}
+            {/*                      setHeight(event.target.value);*/}
+            {/*                    }}*/}
+            {/*/>*/}
             {/*Weight: */}
             <TextField style={{width: "6ch"}} id="standard-basic" variant="standard" label={"Weight"} defaultValue={weight}
                                  InputProps={{endAdornment:<InputAdornment position="end">kg</InputAdornment>}}
@@ -45,22 +45,22 @@ export default function PatientInfoInput({height, weight, age, sex, setHeight, s
                     }
             />
             {/*Sex:  */}
-            <TextField
-                      id="standard-select-sex"
-                      select
-                      defaultValue={sex}
-                      label={"Sex"}
-                        onChange={(event) => {
-                                        setSex(event.target.value);
-                                        }
-                        }
-                    >
-                  {['Male', 'Female'].map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-        </TextField>
+            {/*<TextField*/}
+            {/*          id="standard-select-sex"*/}
+            {/*          select*/}
+            {/*          defaultValue={sex}*/}
+            {/*          label={"Sex"}*/}
+            {/*            onChange={(event) => {*/}
+            {/*                            setSex(event.target.value);*/}
+            {/*                            }*/}
+            {/*            }*/}
+            {/*        >*/}
+            {/*      {['Male', 'Female'].map((option) => (*/}
+            {/*        <MenuItem key={option} value={option}>*/}
+            {/*          {option}*/}
+            {/*        </MenuItem>*/}
+            {/*      ))}*/}
+        {/*</TextField>*/}
     </div>
   );
 }
