@@ -87,6 +87,7 @@ function getRowContent(deleteRow) {
               :
               (
                 <DeleteForeverIcon
+                  style={{cursor: 'pointer'}}
                     onClick={() => deleteRow(_index)}/>
               )
           }
