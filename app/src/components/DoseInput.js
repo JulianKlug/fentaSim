@@ -9,6 +9,7 @@ import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {TimePicker} from '@mui/x-date-pickers/TimePicker';
 import * as React from "react";
 import {useEffect} from "react";
+import MultiDoseParser from "./MultiDoseParser.js";
 
 
 const useStyles = makeStyles((theme) => ({}));
@@ -55,6 +56,14 @@ const DoseInput = ({addDose}) => {
                         Add Dose
                     </Button>
                 </Grid>
+                <Grid item
+                    sx={{
+                        width: 5,
+                    }}
+                >
+                    <MultiDoseParser addDose={addDose}/>
+                </Grid>
+                            
             </Grid>
         </div>
     )
