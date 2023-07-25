@@ -49,6 +49,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "babel-jest": "^29.6.1",
-    "jest": "^27.5.1"
+    "jest": "^27.5.1",
+    "react-virtuoso": "^4.4.2"
   }
 }
