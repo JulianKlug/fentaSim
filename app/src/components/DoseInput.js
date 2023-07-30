@@ -11,7 +11,7 @@ import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {TimePicker} from '@mui/x-date-pickers/TimePicker';
 import * as React from "react";
-import {useEffect} from "react";
+import {useEffect, useRef} from "react";
 import MultiDoseParser from "./MultiDoseParser.js";
 
 
@@ -23,16 +23,28 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+function isFocused(ref) {
+    return ref.current
+            && ref.current.contains(document.activeElement)
+            && document.activeElement instanceof HTMLInputElement
+}
+
 const DoseInput = ({addDoses}) => {
     const classes = useStyles();
+    const refDoseInput = useRef(null);
     const [value, setValue] = React.useState(100);
     const [timeValue, setTimeValue] = React.useState(dayjs(new Date()));
-    const [multiDoseParserOpen, setMultiDoseParserOpen] = React.useState(false);
 
-    // update time every 30 seconds
+    // update time every 90 seconds unless input field is focused
     useEffect(() => {
-      setInterval(() => setTimeValue(dayjs(new Date())), 90000);
+        setInterval(() => 
+            {
+                if (!isFocused(refDoseInput)) {
+                    setTimeValue(dayjs(new Date()))
+                }
+            }, 90000);
     }, []);
+
 
     const isMobile = function() {
         let check = false;
@@ -40,9 +52,12 @@ const DoseInput = ({addDoses}) => {
         return check;
       };
     
+
     return (
         <div>
-            <Grid container rowSpacing={2} columnSpacing={5} direction="row" alignItems="center" justifyContent="center">
+            <Grid container rowSpacing={2} columnSpacing={5} direction="row" alignItems="center" justifyContent="center"
+                ref={refDoseInput}
+            >
                 <Grid item
                     sx={{
                             width: 200,
@@ -52,7 +67,7 @@ const DoseInput = ({addDoses}) => {
                         <TimePicker
                             // label="Administered at"
                             value={timeValue}
-                            onChange={(newTimeValue) => setTimeValue(newTimeValue)}
+                            onChange={(newTimeValue) => setTimeValue(newTimeValue)} 
                             ampm={false}
                           slotProps={{ textField: { size: 'small' } }}
                         />
@@ -63,7 +78,8 @@ const DoseInput = ({addDoses}) => {
                                 height: 0.5,
                             }}
                     >
-                    <InputSlider max={500} title={'mcg'} handleValueChange={setValue}/>
+                    <InputSlider 
+                        max={500} title={'mcg'} handleValueChange={setValue}/>
                 </Grid>
                 <Grid item>
                     <Button variant="outlined" endIcon={<AddCircleOutlineOutlinedIcon/>}
