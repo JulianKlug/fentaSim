@@ -117,7 +117,7 @@ const Graph = ({ data, site }) => {
                 transform={`rotate(-90)`}
               x={0 - 3 * layout.height / 4} y={0} dy="1em"
           >
-              {"Concentration"}
+              {"Concentration (ng/ml)"}
           </text>
 
             // Axes

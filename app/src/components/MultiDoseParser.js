@@ -24,14 +24,67 @@ const modalStyle = {
         borderRadius: 2,
     };
 
-const MultiDoseParser = ({addDose}) => {
+function parseMultiDoseString(inputData) {
+    const regex = /(?<drug>[A-Za-z]+(?: [A-Za-z]+)*)\s*(?<volume>\d+ ml)?\s*(?<dose>\d+(\.\d+)?)?\s*(?<unit>[A-Za-z]+)?\s*(?<time>\d{2}\.\d{2}\.\d{4} \d{2}:\d{2})/g;
+    const matches = [];
+    let match;
+
+    while ((match = regex.exec(inputData)) !== null) {
+        const drug = (match.groups.drug || "").trim();
+        const volume = (match.groups.volume || "").trim();
+        let dose = parseFloat((match.groups.dose || "").trim());
+        let unit = (match.groups.unit || "").trim();
+        let time = (match.groups.time || "").trim();
+
+        if (drug.toLowerCase() !== "fentanyl") {
+            continue;
+        }   
+
+        // target unit: mcg
+        if (unit === "g") { 
+            dose *= 1000000;
+            unit = "mcg";
+        } else if (unit === "mg") {
+            dose *= 1000;
+            unit = "mcg";
+        }
+        if (unit !== "mcg") {
+            continue;
+        }
+
+        time = timeStringParser(time);
+
+        if (drug !== "") {
+        matches.push({ drug, volume, dose, unit, time });
+        }
+    }
+
+    return matches;
+}
+
+function timeStringParser(dateString) {
+    const [datePart, timePart] = dateString.split(" ");
+    const [day, month, year] = datePart.split(".");
+    const [hour, minute] = timePart.split(":");
+    const formattedDate = new Date(`${year}-${month}-${day}T${hour}:${minute}`);
+
+    return formattedDate;
+}
+
+const MultiDoseParser = ({addDoses}) => {
     const classes = useStyles();
     const [open, setOpen] = useState(false);
+    const [multiDoseString, setMultiDoseString] = useState('');
 
-    const toggleOpen = () => {
+    const toggleOpen = async () => {
         setOpen(!open);
     }
 
+    const parseData = () => {
+        const parsedData = parseMultiDoseString(multiDoseString);
+        addDoses(parsedData);
+        toggleOpen();
+    };
 
     return (
         <div>
@@ -53,9 +106,13 @@ const MultiDoseParser = ({addDose}) => {
         >
         {/* open a text input field */}
         <Box sx={modalStyle}>
-            <TextField id="standard-basic" label="Parse multiple doses" variant="standard" />
+            <TextField id="standard-basic" label="Parse multiple doses" variant="standard" 
+                onChange={(event) => {
+                                    setMultiDoseString(event.target.value);
+                                    }}
+            />
             <IconButton color='primary' 
-                onClick={toggleOpen}>
+                onClick={parseData}>
                 <PlaylistAddOutlinedIcon/>
             </IconButton>
         </Box>
