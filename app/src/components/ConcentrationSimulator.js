@@ -100,15 +100,26 @@ const ConcentrationSimulator = ({ }) => {
         setConcentrationEvolution(newConcentrationEvolution);
     };
 
-
-    const addDose = (dose, time) => {
-        // dose in mcg
-        const currentTime = new Date(time);
-        const newDose = { Drug: drug, TimeDate: currentTime.getTime(), Dose: dose, Units: "mcg" }
-
-        const tempDoseHistory = [...doseHistory, newDose];
+    const addDoses = (doses) => {
+        // doses is an array of objects with keys dose and time
+        doses = doses.map((dose) => {
+            const adminTime = new Date(dose.time);
+            return { Drug: drug, TimeDate: adminTime.getTime(), Dose: dose.dose, Units: "mcg" }
+        });
+        const tempDoseHistory = [...doseHistory, ...doses];
         const [newDoseHistory, newReferenceTime, _, newMaximum] = updateDoseHistory(tempDoseHistory);
         updateConcentrationEvolution(newDoseHistory, newReferenceTime, newMaximum);
+    }
+
+    const addDose = (dose, time) => {
+        addDoses([{ dose: dose, time: time}]);
+        // // dose in mcg
+        // const adminTime = new Date(time);
+        // const newDose = { Drug: drug, TimeDate: adminTime.getTime(), Dose: dose, Units: "mcg" }
+
+        // const tempDoseHistory = [...doseHistory, newDose];
+        // const [newDoseHistory, newReferenceTime, _, newMaximum] = updateDoseHistory(tempDoseHistory);
+        // updateConcentrationEvolution(newDoseHistory, newReferenceTime, newMaximum);
     }
 
     const deleteDose = (index) => {
@@ -134,7 +145,7 @@ const ConcentrationSimulator = ({ }) => {
             </div>
             <div className={classes.doseInput}>
                 <DoseInput
-                    addDose={addDose}
+                    addDoses={addDoses}
                 />
                 <DoseHistory summaryContent={"Dose history"} doseHistory={doseHistory} deleteDose={deleteDose} />
             </div>
