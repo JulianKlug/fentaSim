@@ -127,7 +127,19 @@ const Graph = ({ data, site }) => {
                   ref={getXAxis}
                   transform={`translate(0,${layout.height})`}
               />
-            
+
+    // display current time (new Date()) as dot on x-axis if current time inf to max of x-axis
+            <circle
+                cx={graphDetails.xScale(new Date())}
+                cy={layout.height}
+                r={new Date() < graphDetails.xScale.domain()[1] ? 2 : 0}
+                fill='#666'
+                strokeWidth={new Date() < graphDetails.xScale.domain()[1] ? 2 : 0}
+                stroke="#fff"
+                style={{ transition: "ease-out .1s" }}
+            />
+
+            // Hovering
             {data.map((item, index) => {
               return (
                   <g key={index}>
@@ -160,7 +172,7 @@ const Graph = ({ data, site }) => {
                             strokeWidth={index === activeIndex ? 0.2 : 0}
                             style={{ transition: "ease-out .1s" }}
                         /> 
-                    // display the time on x-axis
+                    // display the time value on hovering
                         <text
                             fill="#666"
                             // half of text size of dosis
@@ -172,7 +184,7 @@ const Graph = ({ data, site }) => {
                             {index === activeIndex
                                 ? d3.timeFormat("[%H:%M]")(item.x)  // format the time
                                 : ""}
-                        </text>
+                        </text>                    
                   </g>
               );
           })}
