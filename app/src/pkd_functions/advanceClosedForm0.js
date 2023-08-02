@@ -24,7 +24,8 @@ function advanceClosedForm0(dose, pkSet, maximum) {
   let gapEnd = timeLine.slice(1);
   let start = Math.min(0.693 / pkSet.ke0 / 4, 1);
 
-  let newTimes = Array.from({ length: 41 }, (_, i) => Math.exp(Math.log(start) + i * Math.log(1440 / start) / 41));
+  const timeLineResolution = 10; // default in StanpumpR is 1 - here we use 10 for better resolution (as speed is not an issue)
+  let newTimes = Array.from({ length: 41 * timeLineResolution  }, (_, i) => Math.exp(Math.log(start) + i * Math.log(1440 * timeLineResolution / start) / (41 * timeLineResolution)));
   for (let i = 0; i < gapEnd.length; i++) {
     let distance = gapEnd[i] - gapStart[i];
     let times = newTimes.filter(t => t <= distance);
