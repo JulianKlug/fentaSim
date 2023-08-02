@@ -150,6 +150,29 @@ const Graph = ({ data, site }) => {
                           stroke="#fff"
                           style={{ transition: "ease-out .1s" }}
                       />
+                    // line to indicate the point on x-axis
+                        <line
+                            x1={graphDetails.xScale(item.x)}
+                            y1={graphDetails.yScale(item.y)}
+                            x2={graphDetails.xScale(item.x)}
+                            y2={layout.height}
+                            stroke="#666"
+                            strokeWidth={index === activeIndex ? 0.2 : 0}
+                            style={{ transition: "ease-out .1s" }}
+                        /> 
+                    // display the time on x-axis
+                        <text
+                            fill="#666"
+                            // half of text size of dosis
+                            fontSize={8}
+                            x={graphDetails.xScale(item.x)}
+                            y={graphDetails.yScale(item.y) - 10}
+                            textAnchor="left"
+                        >
+                            {index === activeIndex
+                                ? d3.timeFormat("[%H:%M]")(item.x)  // format the time
+                                : ""}
+                        </text>
                   </g>
               );
           })}
