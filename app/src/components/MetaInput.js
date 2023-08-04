@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function PatientInfoInput({height, weight, age, sex, setHeight, setWeight, setAge, setSex}) {
+export default function MetaInput({height, weight, age, sex, model, setHeight, setWeight, setAge, setSex, setModel}) {
   const classes = useStyles();
 
   return (
@@ -60,6 +60,24 @@ export default function PatientInfoInput({height, weight, age, sex, setHeight, s
             {/*          {option}*/}
             {/*        </MenuItem>*/}
             {/*      ))}*/}
+            {/* Model:  */}
+
+            <TextField
+                id="standard-select-model"
+                select
+                defaultValue={model}
+                label={"Model"}
+                onChange={(event) => {
+                    setModel(event.target.value); }
+                }
+            >
+                {['Scott', 'Shafer'].map((option) => (
+                    <MenuItem key={option} value={option.toLowerCase()}>
+                        {option}
+                    </MenuItem>
+                ))}
+            </TextField>
+           
         {/*</TextField>*/}
     </div>
   );

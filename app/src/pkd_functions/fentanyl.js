@@ -4,26 +4,41 @@
  * @param {number} height - Height in centimeters.
  * @param {number} age - Age in years.
  * @param {string} sex - Sex (male or female).
+ * @param {string} model - Model to use for PK/PD calculations: "shafer" or "scott".
  * @returns {Object} - Fentanyl parameters.
  */
-function fentanyl(weight, height, age, sex) {
+function fentanyl(weight, height, age, sex, model = "shafer") {
   // Units:
   // Time: Minutes
   // Volume: Liters
   // Data from:
+
   // 1 = McClain and Hug, Clin Pharmacol Ther. 1980;28:106-14.
   // 2 = Scott and Stanski, Anesthesiology. 1990;73:1091-102.
   // 3 = Hudson, Anesthesiology. 1986;64:334-8.
   // 4 = Varvel, Anesthesiology. 1989;70:928-34.
   // 5 = Shafer, Anesthesiology. 1990;73:1091-102.
 
+  let v1, v2, v3, cl1, cl2, cl3;
+
   // Default parameters based on weight
-  let v1 = 12.1 * (weight / 70);
-  let v2 = 35.7 * (weight / 70);
-  let v3 = 224 * (weight / 70);
-  let cl1 = 0.632 * Math.pow(weight / 70, 0.75);
-  let cl2 = 2.8 * Math.pow(weight / 70, 0.75);
-  let cl3 = 1.55 * Math.pow(weight / 70, 0.75);
+  if (model === "shafer") {
+    v1 = 12.1 * (weight / 70);
+    v2 = 35.7 * (weight / 70);
+    v3 = 224 * (weight / 70);
+    cl1 = 0.632 * Math.pow(weight / 70, 0.75);
+    cl2 = 2.8 * Math.pow(weight / 70, 0.75);
+    cl3 = 1.55 * Math.pow(weight / 70, 0.75);
+  } else if (model === "scott") {
+    v1 = 12.7 * (weight / 70);
+    v2 = 49.34479 * (weight / 70);
+    v3 = 296.8831 * (weight / 70);
+    cl1 = 0.7112 * Math.pow(weight / 70, 0.75);
+    cl2 = 4.7371 * Math.pow(weight / 70, 0.75);
+    cl3 = 2.286 * Math.pow(weight / 70, 0.75);
+  } else {
+    throw new Error("Invalid model");
+  }
 
   let defaultParams = {
     v1: v1,

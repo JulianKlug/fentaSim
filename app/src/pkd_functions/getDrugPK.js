@@ -11,9 +11,10 @@ import optimize from "../utils/optimize.js";
  * @param {number} height - Height in cm.
  * @param {number} age - Age in years.
  * @param {string} sex - Sex as string: "female" or "male".
+ * @param {string} model - Model to use for PK/PD calculations: "shafer" or "scott".
  * @returns {Object} - Pharmacokinetic and pharmacodynamic values for the drug.
  */
-function getDrugPK(drug = "fentanyl", weight = 70, height = 170, age = 50, sex = "male") {
+function getDrugPK(drug = "fentanyl", weight = 70, height = 170, age = 50, sex = "male", model = "shafer") {
   const DEBUG = false;
 
   const implemented_drugs = {
@@ -24,7 +25,7 @@ function getDrugPK(drug = "fentanyl", weight = 70, height = 170, age = 50, sex =
   }
   const drug_function = implemented_drugs[drug];
 
-  const drug_parameters = drug_function(weight, height, age, sex);
+  const drug_parameters = drug_function(weight, height, age, sex, model);
   const tPeak = drug_parameters.tPeak;
 
   const events = Object.keys(drug_parameters.PK);
@@ -168,18 +169,24 @@ function getDrugPK(drug = "fentanyl", weight = 70, height = 170, age = 50, sex =
 
     // Find ke0 from tPeak
     let ke0;
-    if (tPeak > 0) {
-      ke0 = optimize(tPeakError, [0, 200], {maximum:false}, {
-        tPeak,
-        p_coef_bolus_l1,
-        p_coef_bolus_l2,
-        p_coef_bolus_l3,
-        lambda_1,
-        lambda_2,
-        lambda_3
-      }).extremum;
+    if (model === "shafer") {
+      if (tPeak > 0) {
+        ke0 = optimize(tPeakError, [0, 200], {maximum:false}, {
+          tPeak,
+          p_coef_bolus_l1,
+          p_coef_bolus_l2,
+          p_coef_bolus_l3,
+          lambda_1,
+          lambda_2,
+          lambda_3
+        }).extremum;
+      } else {
+        ke0 = 0;
+      }
+    } else if (model === "scott") {
+      ke0 = 0.146 * Math.pow(weight / 70, 0.75)
     } else {
-      ke0 = 0;
+      throw new Error("Invalid model");
     }
 
     if (ke0 > 0) {

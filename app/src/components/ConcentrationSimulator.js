@@ -5,7 +5,7 @@ import getDrugPK from "../pkd_functions/getDrugPK.js";
 import preprocessDose from "../pkd_functions/preprocessDose.js";
 import advanceClosedForm0 from "../pkd_functions/advanceClosedForm0.js";
 import DoseInput from "./DoseInput";
-import PatientInfoInput from "./PatientInfoInput";
+import MetaInput from "./MetaInput";
 import DoseHistory from "./DoseHistory";
 
 
@@ -35,15 +35,16 @@ const ConcentrationSimulator = ({ }) => {
     const [weight, setWeight] = useState(70);
     const [age, setAge] = useState(70);
     const [sex, setSex] = useState('Male');
+    const [model, setModel] = useState('scott');
     const drug = 'fentanyl';
-    const [drugInfo, setDrugInfo] = useState(getDrugPK(drug, weight, height, age, sex));
+    const [drugInfo, setDrugInfo] = useState(getDrugPK(drug, weight, height, age, sex, model));
 
     const site = 'Effect Site'
 
 
     // Use effect to monitor changes in height, weight, age, sex, and update drugInfo
     useEffect(() => {
-        const newDrugInfo = getDrugPK(drug, weight, height, age, sex)
+        const newDrugInfo = getDrugPK(drug, weight, height, age, sex, model)
         setDrugInfo(newDrugInfo)
 
         // if doseHistory is not empty, update concentrationEvolution
@@ -58,9 +59,9 @@ const ConcentrationSimulator = ({ }) => {
             });
             setConcentrationEvolution(newConcentrationEvolution);
         }
-    }, [height, weight, age, sex]);
+    }, [height, weight, age, sex, model]);
 
-
+    
     // Update dose history and concentration evolution when a new dose is added, and return new dose history as well as reference timepoint
     const updateDoseHistory = (newDoseHistory) => {
         // get smallest time in doseHistory
@@ -113,13 +114,6 @@ const ConcentrationSimulator = ({ }) => {
 
     const addDose = (dose, time) => {
         addDoses([{ dose: dose, time: time}]);
-        // // dose in mcg
-        // const adminTime = new Date(time);
-        // const newDose = { Drug: drug, TimeDate: adminTime.getTime(), Dose: dose, Units: "mcg" }
-
-        // const tempDoseHistory = [...doseHistory, newDose];
-        // const [newDoseHistory, newReferenceTime, _, newMaximum] = updateDoseHistory(tempDoseHistory);
-        // updateConcentrationEvolution(newDoseHistory, newReferenceTime, newMaximum);
     }
 
     const deleteDose = (index) => {
@@ -137,8 +131,8 @@ const ConcentrationSimulator = ({ }) => {
     return (
         <div>
             <div>
-                <PatientInfoInput age={age} height={height} weight={weight} sex={sex}
-                    setAge={setAge} setHeight={setHeight} setWeight={setWeight} setSex={setSex} />
+                <MetaInput age={age} height={height} weight={weight} sex={sex} model={model}
+                    setAge={setAge} setHeight={setHeight} setWeight={setWeight} setSex={setSex} setModel={setModel} />
             </div>
             <div className={classes.simulator}>
                 <Graph data={concentrationEvolution} site={site} />
