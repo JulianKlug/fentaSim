@@ -7,6 +7,7 @@ import advanceClosedForm0 from "../pkd_functions/advanceClosedForm0.js";
 import DoseInput from "./DoseInput";
 import MetaInput from "./MetaInput";
 import DoseHistory from "./DoseHistory";
+import RefreshButton from "./basicComponents/RefreshButton";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -20,9 +21,14 @@ const useStyles = makeStyles((theme) => ({
         width: '90%',
         margin: 'auto',
         marginBottom: '0.5vh'
+    },
+    refreshButtonPosition: {
+        position: "absolute",
+        top: '0',
+        right: '1vw ',
     }
-
 }));
+
 
 const ConcentrationSimulator = ({ }) => {
     const classes = useStyles();
@@ -133,6 +139,9 @@ const ConcentrationSimulator = ({ }) => {
             <div>
                 <MetaInput age={age} height={height} weight={weight} sex={sex} model={model}
                     setAge={setAge} setHeight={setHeight} setWeight={setWeight} setSex={setSex} setModel={setModel} />
+                <div className={classes.refreshButtonPosition}>
+                    <RefreshButton />    
+                </div>
             </div>
             <div className={classes.simulator}>
                 <Graph data={concentrationEvolution} site={site} />

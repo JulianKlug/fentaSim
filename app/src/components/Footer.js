@@ -1,7 +1,6 @@
 import {makeStyles} from "@material-ui/core/styles";
 import React, {useState} from "react";
-import InfoButton from "./InfoButton";
-import {createMuiTheme, ThemeProvider} from "@material-ui/core/styles";
+import InfoButton from "./basicComponents/InfoButton";
 import InfoBackdrop from "./InfoBackdrop";
 
 const useStyles = makeStyles((theme) => ({
@@ -28,17 +27,6 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const footerTheme = createMuiTheme({
-    palette: {
-        primary: {
-          main: "#darkgray"
-        },
-        secondary: {
-          main: "#ffa500"
-        }
-    }
-  });
-
 
 const Footer = () => {
     const classes = useStyles();
@@ -52,18 +40,18 @@ const Footer = () => {
     };
 
     return (
-        <ThemeProvider theme={footerTheme}>
         <div>
-            <div className={classes.phantom}/>
-            <div className={classes.footer}>
-                <h2 className={classes.footerTitle}>FentaSim</h2>
-                <div className={classes.infoButtonPosition} onClick={handleClick}>
-                    <InfoButton />
+            <div>
+                <div className={classes.phantom}/>
+                <div className={classes.footer}>
+                    <h2 className={classes.footerTitle}>FentaSim</h2>
+                    <div className={classes.infoButtonPosition} onClick={handleClick}>
+                        <InfoButton />
+                    </div>
                 </div>
             </div>
+            <InfoBackdrop open={open} handleClose={handleClose}/>
         </div>
-        <InfoBackdrop open={open} handleClose={handleClose}/>
-        </ThemeProvider>
     )
 }
 
